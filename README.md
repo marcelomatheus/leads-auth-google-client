@@ -3,12 +3,18 @@
 Leads Register é um projeto avançado de cadastro e login, desenvolvido com **Next.js** e **TypeScript**.
 A aplicação permite fazer login via **OAuth2 do Google**, utilizando as credenciais configuradas no **Google Cloud Console**.
 
+## Screenshots
+<img src="https://github.com/user-attachments/assets/fcc9774b-d990-49fa-882f-2cfae4af207f" style="width: 500px" />
+<img src="https://github.com/user-attachments/assets/c26b5200-5dea-4fdd-a367-2837df25f896" style="width: 500px" />
+
+
+
 O projeto segue boas práticas de desenvolvimento, como:
 
 - 🔐 Persistência de autenticação com **useContext**
 - 📑 Gerenciamento de formulários com **react-hook-form**
 - ✅ Validação de dados com **zod**
-- 🎨 Estilização moderna com **Tailwind CSS**
+- 🎨 Estilização com **Tailwind CSS**
 
 ---
 
