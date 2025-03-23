@@ -1,29 +1,22 @@
 "use client";
-import {
-  Form,
-  FormField,
-  FormMessageError,
-  Input,
-} from "@/components/ui/Form";
+import { Form, FormField, FormMessageError, Input } from "@/components/ui/Form";
 import { ComponentProps, useState } from "react";
 import { Eye, EyeClosed, Lock, LockKeyhole, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import Image from "next/image";
-import Google from "@/Google.svg";
 import { FieldErrors, useForm } from "react-hook-form";
-import { useGoogleLogin } from "@react-oauth/google";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { userLogin } from "../_service/auth-service";
-import { useAuth } from "@/app/context/Auth-Context";
-import { redirect } from "next/navigation";
+import { useAuth } from "@/app/_context/Auth-Context";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import GoogleAuthButton from "../_components/GoogleAuthButton";
 
-export const formSchema = z
-  .object({
-    email: z.string().email("Preencha o campo com um email válido"),
-    password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
-  })
+export const formSchema = z.object({
+  email: z.string().email("Preencha o campo com um email válido"),
+  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+});
 type Form = z.infer<typeof formSchema>;
 
 export const FormLogin = () => {
@@ -33,20 +26,35 @@ export const FormLogin = () => {
     formState: { errors },
   } = useForm({ resolver: zodResolver(formSchema) });
 
-  const contextLogin = useAuth()
+  const [errorAccess, setErrorAccess] = useState<{ message: string }>();
+
+  const router = useRouter();
+
+  const contextLogin = useAuth();
+
   const onSubmit = async (payload: Form) => {
     try {
-      const userData = await userLogin(payload);
-      contextLogin?.dispatch({ type: "LOGIN", payload: { token: userData.data.token } });
-      redirect("/");
-    }catch(error){
-      console.error(error);
+      const userLoginData = await userLogin({
+        email: payload.email,
+        password: payload.password,
+      });
+      if (userLoginData.data.token) {
+        contextLogin?.dispatch({
+          type: "LOGIN",
+          payload: { token: userLoginData.data.token },
+        });
+        router.push("/");
+      }
+    } catch (error) {
+      const err = error as AxiosError<{
+        message: string;
+      }>;
+      const message = err?.response?.data?.message
+        ? String(err?.response?.data?.message)
+        : "Erro ao fazer login";
+      setErrorAccess({ message });
     }
   };
-  const login = useGoogleLogin({
-    onSuccess: (response) => console.log(response),
-    onError: (error) => console.error(error),
-  });
   return (
     <div className="flex mx-auto h-screen flex-col justify-center items-center">
       <Form onSubmit={handleSubmit(onSubmit)} className="md:w-[400px]">
@@ -65,21 +73,17 @@ export const FormLogin = () => {
         <Button name="register" type="submit">
           Login
         </Button>
-        <Button
-          name="registerGoogle"
-          type="button"
-          onClick={() => login()}
-          className="flex flex-row justify-center items-center mx-auto gap-2"
-        >
-          <Image src={Google} className="size-4" alt="logo Google" /> Entrar
-          com o Google
-        </Button>
+        <GoogleAuthButton />
         <div className="flex mx-auto gap-1">
           Não tem uma conta?
-          <Link href={'/auth/register'} className="underline text-gray-100 cursor-pointer">Faça o cadastro</Link>
-          
+          <Link
+            href={"/auth/register"}
+            className="underline text-gray-100 cursor-pointer"
+          >
+            Faça o cadastro
+          </Link>
         </div>
-        <FormRegisterMessageError errors={errors} />
+        <FormRegisterMessageError errors={errors} errorsAccess={errorAccess}/>
       </Form>
     </div>
   );
@@ -116,14 +120,13 @@ const FormFieldPassword = ({
 
 type FormRegisterMessageErrorProps = {
   errors?: FieldErrors<Form>;
+  errorsAccess?: { message: string };
 } & ComponentProps<"div">;
 const FormRegisterMessageError = ({
   errors,
+  errorsAccess,
   ...props
 }: FormRegisterMessageErrorProps) => {
-  const errorsArray = [
-    errors?.password?.message,
-    errors?.email?.message
-  ];
+  const errorsArray = [errors?.password?.message, errors?.email?.message, errorsAccess?.message];
   return <FormMessageError errors={errorsArray} {...props} />;
 };
