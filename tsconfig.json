@@ -20,7 +20,10 @@
     ],
     "paths": {
       "@/*": ["./src/*", "./assets/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types"],
+
+    "types": ["offscreencanvas", "stats.js", "webxr"]
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
