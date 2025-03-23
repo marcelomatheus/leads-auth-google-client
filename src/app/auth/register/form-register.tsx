@@ -9,17 +9,15 @@ import {
 import { ComponentProps, useState } from "react";
 import { Eye, EyeClosed, Lock, LockKeyhole, Mail, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import Image from "next/image";
-import Google from "@/Google.svg";
 import { FieldErrors, useForm } from "react-hook-form";
-import { useGoogleLogin } from "@react-oauth/google";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { userLogin, userRegister } from "@/app/auth/_service/auth-service";
-import { useAuth } from "@/app/context/Auth-Context";
+import { useAuth } from "@/app/_context/Auth-Context";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
+import GoogleAuthButton from "../_components/GoogleAuthButton";
 
 export const formSchema = z
   .object({
@@ -70,15 +68,10 @@ export const FormRegister = () => {
       const err = (error as AxiosError<{
             message: string;
           }>);
-      const message = String(err?.response?.data?.message) || "Erro ao fazer login";
+      const message = err?.response?.data?.message ? String(err?.response?.data?.message) : "Erro ao fazer login";
       setErrorAccess({message});
     }
   };
-
-  const login = useGoogleLogin({
-    onSuccess: (response) => console.log(response),
-    onError: (error) => console.error(error),
-  });
 
   return (
     <div className="flex mx-auto h-screen flex-col justify-center items-center">
@@ -122,15 +115,7 @@ export const FormRegister = () => {
         <Button name="register" type="submit">
           Cadastrar
         </Button>
-        <Button
-          name="registerGoogle"
-          type="button"
-          onClick={() => login()}
-          className="flex flex-row justify-center items-center mx-auto gap-2"
-        >
-          <Image src={Google} className="size-4" alt="logo Google" /> Registrar
-          com o Google
-        </Button>
+        <GoogleAuthButton />
         <div className="flex mx-auto gap-1">
           Já tem uma conta?
           <Link
