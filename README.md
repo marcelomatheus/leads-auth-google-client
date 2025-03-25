@@ -74,7 +74,7 @@ Antes de iniciar, você precisa ter instalado:
 
 ### 2️⃣ Clonar o Repositório:
 ```bash
-git clone https://github.com/seu-usuario/leads-register.git
+git clone https://github.com/marcelomatheus/leads-register.git
 cd leads-register
 ```
 
