@@ -32,7 +32,10 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (getToken !== 'undefined' && getToken !== null) {
         dispatch({ type: "LOGIN", payload: { token: getToken } });
       } else if (path !== "/auth/login" && path !== "/auth/register") {
-        router.push("/auth/login");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 3000);
+        
       }
     }
   }, [token.token, path, router]);  
